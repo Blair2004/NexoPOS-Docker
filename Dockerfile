@@ -73,11 +73,11 @@ RUN ln -s /usr/share/phpmyadmin /var/www/html/database
 COPY conf/database.conf /etc/nginx/sites-available/database.conf
 
 # Step 2: Install NexoPOS
-# Clone the NexoPOS repository to /var/www/html/default
+# Clone the NexoPOS repository to /var/www/html/nexopos
 RUN sudo apt-get install -y git && \
-    git clone https://github.com/blair2004/NexoPOS.git /var/www/html/default && \
-    git -C /var/www/html/default checkout master && \
-    cp /var/www/html/default/.env.example /var/www/html/default/.env
+    git clone https://github.com/blair2004/NexoPOS.git /var/www/html/nexopos && \
+    git -C /var/www/html/nexopos checkout master && \
+    cp /var/www/html/nexopos/.env.example /var/www/html/nexopos/.env
 
 # Configure PHP
 RUN sudo sed -i "s/^user = www-data/user = nexocloud/" /etc/php/8.2/fpm/pool.d/www.conf
@@ -88,20 +88,20 @@ RUN sudo sed -i "s/;?listen\.mode.*/listen.mode = 0666/" /etc/php/8.2/fpm/pool.d
 RUN sudo sed -i "s/;?request_terminate_timeout .*/request_terminate_timeout = 60/" /etc/php/8.2/fpm/pool.d/www.conf
 
 # Configure Cron
-RUN echo "* * * * * nexocloud php /var/www/html/default/artisan schedule:run >> /dev/null 2>&1" >> sudo /etc/crontab
+RUN echo "* * * * * nexocloud php /var/www/html/nexopos/artisan schedule:run >> /dev/null 2>&1" >> sudo /etc/crontab
 
 # Set default PHP
 RUN sudo update-alternatives --set php /usr/bin/php8.2
 
 # Install Composer packages for the Laravel app
-RUN cd /var/www/html/default && \
+RUN cd /var/www/html/nexopos && \
     composer install --no-progress --no-interaction && \
     composer require predis/predis --no-progress --no-suggest --no-interaction
 
 # Change the queue connection on .env from sync to database
-RUN sed -i "s/^QUEUE_CONNECTION=sync/QUEUE_CONNECTION=database/" /var/www/html/default/.env
+RUN sed -i "s/^QUEUE_CONNECTION=sync/QUEUE_CONNECTION=database/" /var/www/html/nexopos/.env
 
-RUN sudo chown -R nexocloud:nexocloud /var/www/html/default
+RUN sudo chown -R nexocloud:nexocloud /var/www/html/nexopos
 RUN git config --global credential.helper store
 
 # We'll get some bash script remotely, copy it to the bin directory and make them executable
@@ -118,16 +118,16 @@ RUN sudo chmod +x /usr/local/bin/xdebug.sh
 # Copy the nginx configuration file
 
 COPY sh/startup.sh /usr/local/bin/startup.sh
-COPY conf/default.conf /etc/nginx/sites-available/default.conf
+COPY conf/nexopos.conf /etc/nginx/sites-available/nexopos.conf
 COPY conf/supervisor.conf /etc/supervisor/conf.d/default.conf
 
 # We need to apply a CRLF to LF on the copied files using the "sed" method
 RUN sudo sed -i 's/\r$//' /usr/local/bin/startup.sh
-RUN sudo sed -i 's/\r$//' /etc/nginx/sites-available/default.conf
+RUN sudo sed -i 's/\r$//' /etc/nginx/sites-available/nexopos.conf
 RUN sudo sed -i 's/\r$//' /etc/supervisor/conf.d/default.conf
 
 RUN sudo chmod +x /usr/local/bin/startup.sh
-RUN sudo ln -s /etc/nginx/sites-available/default.conf /etc/nginx/sites-enabled/default.conf
+RUN sudo ln -s /etc/nginx/sites-available/nexopos.conf /etc/nginx/sites-enabled/nexopos.conf
 RUN sudo ln -s /etc/nginx/sites-available/database.conf /etc/nginx/sites-enabled/database.conf
 
 # Start the MariaDB service

@@ -18,16 +18,16 @@ declare -A keys=(["DB_DATABASE"]=$DB_NAME ["DB_USERNAME"]=$DB_USER ["DB_PASSWORD
 # # Loop over the keys
 for key in "${!keys[@]}"; do
     # If the key exists in the .env file, update it. Otherwise, add it.
-    if grep -q "^$key=" /var/www/html/default/.env; then
+    if grep -q "^$key=" /var/www/html/nexopos/.env; then
         # The key exists, so update it
-        sed -i "s/^$key=.*/$key=${keys[$key]}/" /var/www/html/default/.env
+        sed -i "s/^$key=.*/$key=${keys[$key]}/" /var/www/html/nexopos/.env
     else
         # The key doesn't exist, so add it
-        echo "$key=${keys[$key]}" >> /var/www/html/default/.env
+        echo "$key=${keys[$key]}" >> /var/www/html/nexopos/.env
     fi
 done
 
-cd /var/www/html/default && sudo chown nexocloud:nexocloud . -R
+cd /var/www/html/nexopos && sudo chown nexocloud:nexocloud . -R
 
 # make sure supervisor is running
 sudo supervisorctl reread
