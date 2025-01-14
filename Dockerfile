@@ -70,13 +70,13 @@ RUN sudo apt-get update && \
 RUN ln -s /usr/share/phpmyadmin /var/www/html/database
 
 # Copy the Nginx configuration file for phpMyAdmin
-COPY database.conf /etc/nginx/sites-available/database.conf
+COPY conf/database.conf /etc/nginx/sites-available/database.conf
 
 # Step 2: Install NexoPOS
 # Clone the NexoPOS repository to /var/www/html/default
 RUN sudo apt-get install -y git && \
     git clone https://github.com/blair2004/NexoPOS.git /var/www/html/default && \
-    git -C /var/www/html/default checkout v5.0.x && \
+    git -C /var/www/html/default checkout master && \
     cp /var/www/html/default/.env.example /var/www/html/default/.env
 
 # Configure PHP
@@ -117,10 +117,9 @@ RUN sudo chmod +x /usr/local/bin/xdebug.sh
 
 # Copy the nginx configuration file
 
-COPY startup.sh /usr/local/bin/startup.sh
-COPY default.conf /etc/nginx/sites-available/default.conf
-COPY supervisor.conf /etc/supervisor/conf.d/default.conf
-COPY ./services /usr/local/bin/services
+COPY sh/startup.sh /usr/local/bin/startup.sh
+COPY conf/default.conf /etc/nginx/sites-available/default.conf
+COPY conf/supervisor.conf /etc/supervisor/conf.d/default.conf
 
 # We need to apply a CRLF to LF on the copied files using the "sed" method
 RUN sudo sed -i 's/\r$//' /usr/local/bin/startup.sh
@@ -136,4 +135,4 @@ RUN sudo ln -s /etc/nginx/sites-available/database.conf /etc/nginx/sites-enabled
 ENTRYPOINT [ "/usr/local/bin/startup.sh" ]
 CMD [ "/bin/bash" ]
 
-# docker run -d -p 80:80 -p 443:443 -e DB_USER=nexocloud -e DB_PWD=Afromaster_2004 -e DB_NAME=nexocloud default
+# docker run -d -p 80:80 -e DB_USER=nexocloud -e DB_PWD=Afromaster_2004 -e DB_NAME=nexocloud default
