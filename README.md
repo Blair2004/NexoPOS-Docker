@@ -27,4 +27,4 @@ The default domain for both NexoPOS and phpmyadmin are: nexopos.dev and phpmyadm
 # Running The Image
 To run the image in interactive mode you'll use this command:
 
-`docker run -it -e DB_USER=nexocloud -e DB_NAME=nexocloud -e DB_PWD=Afromaster_2004 -p 80:80 -p 443:443 nexopos`
+`docker run -it -e DB_USER=nexocloud -e DB_NAME=nexocloud -e DB_PWD=123456 -p 80:80 -p 443:443 nexopos`
